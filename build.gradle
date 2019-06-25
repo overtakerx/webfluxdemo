@@ -1,7 +1,6 @@
 plugins {
-	id 'org.springframework.boot' version '2.1.4.RELEASE'
-	id "com.github.lkishalmi.gatling" version "3.0.2"
-	id 'java'
+    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'java'
 }
 
 
@@ -13,23 +12,52 @@ version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+dependencyManagement {
+    testCompile {
+        dependencies {
+            dependencySet(group: 'io.netty', version: '4.0.51.Final') {
+                entry 'netty-codec-http'
+                entry 'netty-codec'
+                entry 'netty-handler'
+                entry 'netty-buffer'
+                entry 'netty-transport'
+                entry 'netty-common'
+                entry 'netty-transport-native-epoll'
+            }
+        }
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-webflux'
-	implementation 'org.springframework.boot:spring-boot-starter-tomcat'
-	compileOnly 'org.projectlombok:lombok'
-	compile 'org.scala-lang:scala-library:2.11.8'
-	runtimeOnly 'org.springframework.boot:spring-boot-devtools'
-	annotationProcessor 'org.projectlombok:lombok'
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation 'io.projectreactor:reactor-test'
+
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.scala-lang:scala-library:2.12.4'
+    testImplementation 'io.gatling:gatling-app:2.3.1'
+    testImplementation 'io.gatling.highcharts:gatling-charts-highcharts:2.3.1'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+task gatlingRun(type: JavaExec) {
+    classpath = sourceSets.test.runtimeClasspath + configurations.testCompile + configurations.testCompile
+    main = "io.gatling.app.Gatling"
+
+    args = [
+            '-s', 'simulations.LoadSimulation',
+            '-sf', 'test/resources',
+            '-df', 'test/resources',
+            '-rf', "${buildDir}/reports/gatling",
+    ]
 }
 
