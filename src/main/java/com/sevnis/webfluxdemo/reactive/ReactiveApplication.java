@@ -33,4 +33,11 @@ public class ReactiveApplication implements WebServerFactoryCustomizer<Configura
         .bodyToMono(String.class);
   }
 
+  @GetMapping("/wrongreactiveendpoint")
+  public String wrongReactiveEndpoint() {
+    return client.get()
+        .uri("/slowendpoint")
+        .retrieve()
+        .bodyToMono(String.class).block();
+  }
 }
